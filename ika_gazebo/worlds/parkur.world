@@ -1,71 +1,53 @@
 <?xml version="1.0" ?>
-<sdf version="1.6">
+<sdf version="1.7">
   <world name="teknofest_parkur">
     
-    <physics type="ode">
+    <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_factor>1.0</real_time_factor>
     </physics>
 
-    <include><uri>model://sun</uri></include>
-    <include><uri>model://ground_plane</uri></include>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
 
-    <!-- Barriers -->
-    <model name="barrier_left">
-      <static>true</static>
-      <pose>10 1.55 0.25 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><box><size>30 0.1 0.5</size></box></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
-        <collision name="c"><geometry><box><size>30 0.1 0.5</size></box></geometry></collision>
-      </link>
-    </model>
-    
-    <model name="barrier_right">
-      <static>true</static>
-      <pose>10 -1.55 0.25 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><box><size>30 0.1 0.5</size></box></geometry><material><script><name>Gazebo/White</name></script></material></visual>
-        <collision name="c"><geometry><box><size>30 0.1 0.5</size></box></geometry></collision>
-      </link>
-    </model>
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
 
-    <!-- Sliding Obstacle -->
-    <model name="sliding_obstacle">
-      <pose>5 0 0.5 0 0 0</pose>
-      <link name="link">
-        <inertial>
-          <mass>10.0</mass>
-          <inertia><ixx>1</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1</iyy><iyz>0</iyz><izz>1</izz></inertia>
-        </inertial>
-        <collision name="c"><geometry><box><size>0.2 1.0 1.0</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.2 1.0 1.0</size></box></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
-      </link>
-      <plugin name="sliding_obstacle_plugin" filename="libsliding_obstacle_plugin.so">
-        <velocity>0.2</velocity>
-        <range>1.2</range>
-      </plugin>
-    </model>
-
-    <!-- Ramp -->
-    <model name="steep_ramp">
+    <model name="ground_plane">
       <static>true</static>
-      <pose>18 0 0.5 0 0.41 0</pose> 
       <link name="link">
-        <visual name="v"><geometry><box><size>6 3.0 0.1</size></box></geometry><material><script><name>Gazebo/Grey</name></script></material></visual>
-        <collision name="c"><geometry><box><size>6 3.0 0.1</size></box></geometry></collision>
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse><specular>0.8 0.8 0.8 1</specular></material>
+        </visual>
       </link>
     </model>
 
-    <!-- Target -->
-    <model name="shooting_target">
-      <static>true</static>
-      <pose>28 0 1.2 0 1.5707 0</pose>
+    <!-- Test Box to see if rendering works -->
+    <model name="test_box">
+      <pose>2 2 0.5 0 0 0</pose>
       <link name="link">
-        <visual name="v_outer"><geometry><cylinder radius="0.3" length="0.01"/></geometry><material><script><name>Gazebo/White</name></script></material></visual>
-        <visual name="v_inner"><geometry><cylinder radius="0.1" length="0.011"/></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
+        <visual name="v"><geometry><box><size>1 1 1</size></box></geometry><material><ambient>0 1 0 1</ambient></material></visual>
       </link>
     </model>
+
+    <!-- TEKNOFEST Parkuru -->
+    <include>
+      <uri>model://parkur</uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
 
   </world>
 </sdf>

@@ -6,16 +6,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(gazebo_ros REQUIRED)
 
-# Sliding Obstacle Plugin
-add_library(sliding_obstacle_plugin SHARED src/sliding_obstacle_plugin.cpp)
-target_link_libraries(sliding_obstacle_plugin gazebo_ros::gazebo_ros)
-
-install(TARGETS sliding_obstacle_plugin
-  DESTINATION lib/${PROJECT_NAME})
-
+# Install worlds
 install(DIRECTORY worlds
+  DESTINATION share/${PROJECT_NAME})
+
+# Install models
+install(DIRECTORY models
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
