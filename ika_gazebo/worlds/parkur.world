@@ -1,60 +1,94 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <world name="teknofest_parkur">
+    
+    <!-- Physics for better performance -->
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
     <include><uri>model://sun</uri></include>
     <include><uri>model://ground_plane</uri></include>
 
     <!-- Kırmızı-Beyaz Bariyerli Yol (3m Genişlik) -->
-    <model name="yol_bariyer_sol">
+    <!-- Sol Bariyer -->
+    <model name="barrier_left">
       <static>true</static>
-      <pose>10 1.5 0.4 0 0 0</pose>
-      <link name="link"><visual name="v"><geometry><box><size>20 0.1 0.8</size></box></geometry><material><script><name>Gazebo/Red</name></script></material></visual></link>
+      <pose>10 1.55 0.25 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>30 0.1 0.5</size></box></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
+        <collision name="c"><geometry><box><size>30 0.1 0.5</size></box></geometry></collision>
+      </link>
     </model>
-    <model name="yol_bariyer_sag">
+    
+    <!-- Sağ Bariyer -->
+    <model name="barrier_right">
       <static>true</static>
-      <pose>10 -1.5 0.4 0 0 0</pose>
-      <link name="link"><visual name="v"><geometry><box><size>20 0.1 0.8</size></box></geometry><material><script><name>Gazebo/White</name></script></material></visual></link>
+      <pose>10 -1.55 0.25 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>30 0.1 0.5</size></box></geometry><material><script><name>Gazebo/White</name></script></material></visual>
+        <collision name="c"><geometry><box><size>30 0.1 0.5</size></box></geometry></collision>
+      </link>
     </model>
 
-    <!-- Kayar Engel (1m genişlik, 20 cm/s hız) -->
-    <model name="kayar_engel">
+    <!-- Kayar Engel (Şartname 6.8: 1m genişlik, 20 cm/s hız) -->
+    <model name="sliding_obstacle">
       <pose>5 0 0.5 0 0 0</pose>
       <link name="link">
+        <inertial>
+          <mass>10.0</mass>
+          <inertia><ixx>1</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1</iyy><iyz>0</iyz><izz>1</izz></inertia>
+        </inertial>
         <collision name="c"><geometry><box><size>0.2 1.0 1.0</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>0.2 1.0 1.0</size></box></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
       </link>
       <plugin name="sliding_obstacle_plugin" filename="libsliding_obstacle_plugin.so">
         <velocity>0.2</velocity>
-        <range>1.5</range>
+        <range>1.2</range>
       </plugin>
     </model>
 
-    <!-- %45 Eğimli Rampa -->
-    <model name="rampa">
+    <!-- %45 Eğimli Rampa (Şartname 6.10: Dik Eğim) -->
+    <model name="steep_ramp">
       <static>true</static>
-      <pose>15 0 0.5 0 0.41 0</pose> <!-- ~24 derece (45% eğim) -->
+      <pose>18 0 0.5 0 0.41 0</pose> <!-- ~24 derece -->
       <link name="link">
-        <visual name="v"><geometry><box><size>5 3 0.1</size></box></geometry></visual>
-        <collision name="c"><geometry><box><size>5 3 0.1</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>6 3.0 0.1</size></box></geometry><material><script><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c"><geometry><box><size>6 3.0 0.1</size></box></geometry></collision>
       </link>
     </model>
 
-    <!-- Atış Bölgesi Hedefi -->
-    <model name="hedef">
+    <!-- Atış Bölgesi Hedefi (A3 Boyutu Yaklaşık) -->
+    <model name="shooting_target">
       <static>true</static>
-      <pose>25 0 1.0 0 1.57 0</pose>
+      <pose>28 0 1.2 0 1.5707 0</pose>
       <link name="link">
-        <visual name="v"><geometry><cylinder radius="0.3" length="0.01"/></geometry><material><script><name>Gazebo/White</name></script></material></visual>
-        <visual name="v2"><geometry><cylinder radius="0.1" length="0.02"/></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
+        <visual name="v_outer"><geometry><cylinder radius="0.3" length="0.01"/></geometry><material><script><name>Gazebo/White</name></script></material></visual>
+        <visual name="v_inner"><geometry><cylinder radius="0.1" length="0.011"/></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
       </link>
     </model>
 
-    <!-- Yağmur/Su Geçişi Görseli -->
-    <model name="su_gecisi">
+    <!-- Su Geçişi Bölgesi -->
+    <model name="water_hazard">
       <static>true</static>
-      <pose>8 0 0.01 0 0 0</pose>
-      <link name="link"><visual name="v"><geometry><box><size>4 3 0.02</size></box></geometry><material><script><name>Gazebo/Blue</name></script></material></visual></link>
+      <pose>12 0 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>4 3 0.02</size></box></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
+      </link>
     </model>
+
+    <!-- Trafik Konileri -->
+    <population name="cones">
+      <model name="cone">
+        <include><uri>model://construction_cone</uri></include>
+      </model>
+      <pose>22 0 0 0 0 0</pose>
+      <box><size>5 2 0.01</size></box>
+      <model_count>5</model_count>
+      <distribution><type>random</type></distribution>
+    </population>
 
   </world>
 </sdf>
