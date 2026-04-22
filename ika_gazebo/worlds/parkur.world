@@ -2,7 +2,6 @@
 <sdf version="1.6">
   <world name="teknofest_parkur">
     
-    <!-- Physics for better performance -->
     <physics type="ode">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
@@ -12,8 +11,7 @@
     <include><uri>model://sun</uri></include>
     <include><uri>model://ground_plane</uri></include>
 
-    <!-- Kırmızı-Beyaz Bariyerli Yol (3m Genişlik) -->
-    <!-- Sol Bariyer -->
+    <!-- Barriers -->
     <model name="barrier_left">
       <static>true</static>
       <pose>10 1.55 0.25 0 0 0</pose>
@@ -23,7 +21,6 @@
       </link>
     </model>
     
-    <!-- Sağ Bariyer -->
     <model name="barrier_right">
       <static>true</static>
       <pose>10 -1.55 0.25 0 0 0</pose>
@@ -33,7 +30,7 @@
       </link>
     </model>
 
-    <!-- Kayar Engel (Şartname 6.8: 1m genişlik, 20 cm/s hız) -->
+    <!-- Sliding Obstacle -->
     <model name="sliding_obstacle">
       <pose>5 0 0.5 0 0 0</pose>
       <link name="link">
@@ -50,17 +47,17 @@
       </plugin>
     </model>
 
-    <!-- %45 Eğimli Rampa (Şartname 6.10: Dik Eğim) -->
+    <!-- Ramp -->
     <model name="steep_ramp">
       <static>true</static>
-      <pose>18 0 0.5 0 0.41 0</pose> <!-- ~24 derece -->
+      <pose>18 0 0.5 0 0.41 0</pose> 
       <link name="link">
         <visual name="v"><geometry><box><size>6 3.0 0.1</size></box></geometry><material><script><name>Gazebo/Grey</name></script></material></visual>
         <collision name="c"><geometry><box><size>6 3.0 0.1</size></box></geometry></collision>
       </link>
     </model>
 
-    <!-- Atış Bölgesi Hedefi (A3 Boyutu Yaklaşık) -->
+    <!-- Target -->
     <model name="shooting_target">
       <static>true</static>
       <pose>28 0 1.2 0 1.5707 0</pose>
@@ -69,26 +66,6 @@
         <visual name="v_inner"><geometry><cylinder radius="0.1" length="0.011"/></geometry><material><script><name>Gazebo/Red</name></script></material></visual>
       </link>
     </model>
-
-    <!-- Su Geçişi Bölgesi -->
-    <model name="water_hazard">
-      <static>true</static>
-      <pose>12 0 0.01 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><box><size>4 3 0.02</size></box></geometry><material><script><name>Gazebo/Blue</name></script></material></visual>
-      </link>
-    </model>
-
-    <!-- Trafik Konileri -->
-    <population name="cones">
-      <model name="cone">
-        <include><uri>model://construction_cone</uri></include>
-      </model>
-      <pose>22 0 0 0 0 0</pose>
-      <box><size>5 2 0.01</size></box>
-      <model_count>5</model_count>
-      <distribution><type>random</type></distribution>
-    </population>
 
   </world>
 </sdf>

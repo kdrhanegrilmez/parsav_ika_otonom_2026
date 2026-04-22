@@ -45,6 +45,7 @@
       </collision>
       <inertial>
         <mass value="2.5"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.05"/>
       </inertial>
     </link>

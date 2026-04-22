@@ -30,7 +30,7 @@ class TabelaDetector(Node):
                 self.get_logger().error(f'Model yüklenemedi: {e}')
                 self.model = None
         else:
-            self.get_logger().error('ultralytics kütüphanesi bulunamadı! Algılama yapılamayacak.')
+            self.get_logger().error('ultralytics kütüphanesi bulunamadı!')
             self.model = None
             
         self.bridge = CvBridge()
@@ -48,8 +48,7 @@ class TabelaDetector(Node):
             # ROS Image -> OpenCV
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             
-            # YOLO Tahmini
-            # conf=0.5, device=0 (GPU)
+            # YOLO Tahmini (conf threshold: 0.5)
             results = self.model.predict(cv_image, conf=0.5, verbose=False)
             
             for r in results:
@@ -58,23 +57,25 @@ class TabelaDetector(Node):
                     cls_id = int(box.cls[0])
                     conf = float(box.conf[0])
                     
-                    # Örnek Sınıflandırma (Yarışma modeline göre güncellenmeli)
-                    # cls_id 0: Tabela, cls_id 1: Hedef olsun
-                    if cls_id == 0:
+                    # Sınıflandırma Mantığı (Yarışma modeline göre özelleştirilmeli)
+                    # Varsayılan YOLOv8 sınıfları yerine özel modelde:
+                    # 0: STOP, 1: HEDEF, 2: SAĞA DÖN, vb.
+                    
+                    if cls_id == 0: # Örnek: Tabela
                         t_msg = TabelaTespit()
-                        t_msg.id = 10 # Örnek ID
+                        t_msg.id = 10 
                         t_msg.guvenilirlik = conf
-                        # Bounding box boyutundan mesafe tahmini (Basit)
-                        w = box.xywh[0][2]
-                        t_msg.mesafe = 100.0 / w # Kalibre edilmeli
+                        # Mesafe tahmini: odak_uzakligi * gercek_yukseklik / piksel_yukseklik
+                        piksel_h = box.xywh[0][3]
+                        t_msg.mesafe = float(500.0 / piksel_h) # Örnek kalibrasyon
                         self.tabela_pub.publish(t_msg)
                         
-                    elif cls_id == 1:
+                    elif cls_id == 1: # Örnek: Atış Hedefi
                         a_msg = AtisDurumu()
                         a_msg.hedef_kilitlendi = True
-                        # Merkezden kaçıklık (x_hata, y_hata)
                         img_h, img_w = cv_image.shape[:2]
                         cx, cy = box.xywh[0][0], box.xywh[0][1]
+                        # Merkezden uzaklık normalize edilmiş (-0.5 ile 0.5 arası)
                         a_msg.x_hata = float((cx - (img_w/2)) / img_w)
                         a_msg.y_hata = float((cy - (img_h/2)) / img_h)
                         self.atis_pub.publish(a_msg)
