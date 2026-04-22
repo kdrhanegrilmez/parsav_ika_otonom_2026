@@ -14,8 +14,9 @@ def generate_launch_description():
     urdf_file = os.path.join(pkg_ika_description, 'urdf', 'ika.urdf')
     world_file = os.path.join(pkg_ika_gazebo, 'worlds', 'parkur.world')
     
-    # Path for custom models
+    # MODIFIED: Adding absolute paths to models AND meshes for textures
     models_path = os.path.join(pkg_ika_gazebo, 'models')
+    meshes_path = os.path.join(pkg_ika_gazebo, 'models', 'parkur', 'meshes')
     
     # Robot State Publisher
     with open(urdf_file, 'r') as infp:
@@ -27,19 +28,20 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_desc, 'use_sim_time': True}]
     )
 
-    # Gazebo Sim (Harmonic)
+    # Gazebo Sim
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r {world_file}'}.items()
+        # '-v 4' adds verbose logging to see exactly why textures fail
+        launch_arguments={'gz_args': f'-r -v 4 {world_file}'}.items()
     )
 
-    # Spawn Robot
+    # Spawn Robot - Adjusted coordinates to be safer (Z=1.5)
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', urdf_file, '-name', 'ika', '-z', '1.0'], # Spawn a bit higher
+        arguments=['-file', urdf_file, '-name', 'ika', '-x', '0', '-y', '0', '-z', '1.5'],
         output='screen'
     )
 
@@ -60,18 +62,11 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Mission nodes
-    mission_manager = Node(package='ika_mission_manager', executable='mission_manager', output='screen', parameters=[{'use_sim_time': True}])
-    watchdog = Node(package='ika_mission_manager', executable='watchdog_node', output='screen', parameters=[{'use_sim_time': True}])
-
     return LaunchDescription([
-        # Add both variables for compatibility
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', models_path),
-        AppendEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', models_path),
+        AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', meshes_path),
         gz_sim,
         robot_state_publisher,
         spawn_robot,
-        bridge,
-        mission_manager,
-        watchdog
+        bridge
     ])

@@ -14,39 +14,18 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
-    <light type="directional" name="sun">
-      <cast_shadows>true</cast_shadows>
-      <pose>0 0 10 0 0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-      <direction>-0.5 0.1 -0.9</direction>
-    </light>
-
-    <model name="ground_plane">
-      <static>true</static>
-      <link name="link">
-        <collision name="collision">
-          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
-        </collision>
-        <visual name="visual">
-          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
-          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse><specular>0.8 0.8 0.8 1</specular></material>
-        </visual>
-      </link>
-    </model>
-
-    <!-- Test Box to see if rendering works -->
-    <model name="test_box">
-      <pose>2 2 0.5 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><box><size>1 1 1</size></box></geometry><material><ambient>0 1 0 1</ambient></material></visual>
-      </link>
-    </model>
+    <!-- Standard Sun and Ground Plane -->
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane</uri>
+    </include>
 
     <!-- TEKNOFEST Parkuru -->
     <include>
       <uri>model://parkur</uri>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>0 0 0.1 0 0 0</pose>
     </include>
 
   </world>
