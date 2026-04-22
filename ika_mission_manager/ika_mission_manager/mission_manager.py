@@ -21,7 +21,7 @@ class MissionState(Enum):
 class MissionManager(Node):
     def __init__(self):
         super().__init__('mission_manager')
-        self.get_logger().info('PARSAV İKA Görev Yöneticisi v2.0 (Asenkron) Başlatıldı.')
+        self.get_logger().info('PARSAV İKA Görev Yöneticisi v2.1 Başlatıldı.')
         
         self.state = MissionState.NAVIGATING
         self.pitch = 0.0
@@ -47,7 +47,10 @@ class MissionManager(Node):
         self.heartbeat_pub.publish(Empty())
 
     def imu_cb(self, msg):
+        # Pitch açısı hesapla (Rampa tespiti)
         sinp = 2 * (msg.orientation.w * msg.orientation.y - msg.orientation.z * msg.orientation.x)
+        # Clamp value to avoid math domain error
+        sinp = max(-1.0, min(1.0, sinp))
         self.pitch = math.degrees(math.asin(sinp))
 
     def tabela_cb(self, msg):
@@ -70,10 +73,11 @@ class MissionManager(Node):
         now = self.get_clock().now()
         
         if self.state == MissionState.NAVIGATING:
-            if abs(self.pitch) > 24.0: # %45 eğim tespiti
+            if abs(self.pitch) > 24.0: # %45 eğim tespiti (~24 derece)
                 self.state = MissionState.WAIT_ON_SLOPE
                 self.start_wait_time = now
                 self.get_logger().info('Rampada Duruldu (2sn Asenkron Bekleme)...')
+                cmd.linear.x = 0.0
             else:
                 cmd = self.last_nav_msg
                 
@@ -82,15 +86,16 @@ class MissionManager(Node):
             if elapsed > Duration(seconds=2):
                 self.state = MissionState.NAVIGATING
                 self.get_logger().info('Bekleme Bitti, Devam Ediliyor.')
+                cmd = self.last_nav_msg
             else:
-                cmd.linear.x = 0.0 # Güvenli Duruş
+                cmd.linear.x = 0.0
                 
         elif self.state == MissionState.ATIS_BOLGESI:
-            cmd.linear.x = 0.0 # Hedef aranırken dur
+            cmd.linear.x = 0.0
             
         elif self.state == MissionState.FIRING:
             elapsed = now - self.start_wait_time
-            if elapsed > Duration(seconds=1): # 1 sn ateş süresi
+            if elapsed > Duration(seconds=1):
                 self.state = MissionState.NAVIGATING
             else:
                 cmd.linear.x = 0.0

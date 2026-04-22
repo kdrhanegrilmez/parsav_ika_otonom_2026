@@ -4,6 +4,14 @@
     <static>true</static>
     <link name="link">
       
+      <!-- Zemin -->
+      <visual name="zemin_visual">
+        <geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry>
+      </visual>
+      <collision name="zemin_collision">
+        <geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry>
+      </collision>
+
       <!-- Yol -->
       <visual name="yol_visual">
         <geometry><mesh><uri>model://parkur/meshes/yol.dae</uri></mesh></geometry>
@@ -19,6 +27,11 @@
       <collision name="bariyer_collision">
         <geometry><mesh><uri>model://parkur/meshes/bariyer.dae</uri></mesh></geometry>
       </collision>
+
+      <!-- Cizgiler -->
+      <visual name="cizgiler_visual">
+        <geometry><mesh><uri>model://parkur/meshes/cizgiler.dae</uri></mesh></geometry>
+      </visual>
 
       <!-- Dik Egim -->
       <visual name="dik_egim_visual">
@@ -66,14 +79,6 @@
       </visual>
       <collision name="tabelalar_collision">
         <geometry><mesh><uri>model://parkur/meshes/tabelalar.dae</uri></mesh></geometry>
-      </collision>
-
-      <!-- Zemin -->
-      <visual name="zemin_visual">
-        <geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry>
-      </visual>
-      <collision name="zemin_collision">
-        <geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry>
       </collision>
 
     </link>

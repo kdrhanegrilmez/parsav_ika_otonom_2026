@@ -14,7 +14,7 @@ def generate_launch_description():
     urdf_file = os.path.join(pkg_ika_description, 'urdf', 'ika.urdf')
     world_file = os.path.join(pkg_ika_gazebo, 'worlds', 'parkur.world')
     
-    # Path for custom models (Searching in share and src)
+    # Path for custom models
     models_path = os.path.join(pkg_ika_gazebo, 'models')
     
     # Robot State Publisher
@@ -39,7 +39,7 @@ def generate_launch_description():
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', urdf_file, '-name', 'ika', '-z', '0.5'],
+        arguments=['-file', urdf_file, '-name', 'ika', '-z', '1.0'], # Spawn a bit higher
         output='screen'
     )
 
@@ -54,7 +54,7 @@ def generate_launch_description():
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/imu/data@sensor_msgs/msg/Imu@gz.msgs.IMU',
             '/camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image',
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
+            '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock'
         ],
         parameters=[{'use_sim_time': True}],
         output='screen'
@@ -65,7 +65,9 @@ def generate_launch_description():
     watchdog = Node(package='ika_mission_manager', executable='watchdog_node', output='screen', parameters=[{'use_sim_time': True}])
 
     return LaunchDescription([
+        # Add both variables for compatibility
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', models_path),
+        AppendEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', models_path),
         gz_sim,
         robot_state_publisher,
         spawn_robot,
