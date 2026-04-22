@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="teknofest_parkur">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- Kayar Engel (Genişlik: 1m, Hız: 20cm/s) -->
+    <model name="kayar_engel">
+      <pose>5 0 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box><size>0.2 1.0 1.0</size></box>
+          </geometry>
+          <material><script><name>Gazebo/Red</name></script></material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box><size>0.2 1.0 1.0</size></box>
+          </geometry>
+        </collision>
+      </link>
+      <!-- Basit Lineer Hareket Eklentisi (C++ kodu gerekir, burada temsilidir) -->
+      <plugin name="slider_plugin" filename="libgazebo_ros_planar_move.so">
+        <commandTopic>cmd_vel_engel</commandTopic>
+        <odometryTopic>odom_engel</odometryTopic>
+      </plugin>
+    </model>
+
+    <!-- Kırmızı Beyaz Parkur Sınırları (Örnek) -->
+    <model name="sag_bariyer">
+      <pose>0 -1.5 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>20 0.1 0.8</size></box></geometry></visual>
+        <collision name="collision"><geometry><box><size>20 0.1 0.8</size></box></geometry></collision>
+      </link>
+      <static>true</static>
+    </model>
+    <model name="sol_bariyer">
+      <pose>0 1.5 0.4 0 0 0</pose>
+      <link name="link">
+        <visual name="visual"><geometry><box><size>20 0.1 0.8</size></box></geometry></visual>
+        <collision name="collision"><geometry><box><size>20 0.1 0.8</size></box></geometry></collision>
+      </link>
+      <static>true</static>
+    </model>
+  </world>
+</sdf>

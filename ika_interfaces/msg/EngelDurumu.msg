@@ -1,0 +1,2 @@
+float32 hiz_vektoru_x
+float32 tahmini_konum_x

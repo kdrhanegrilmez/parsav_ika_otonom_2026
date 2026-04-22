@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<robot name="ika" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Materyaller -->
+  <material name="blue"><color rgba="0 0 0.8 1"/></material>
+  <material name="black"><color rgba="0 0 0 1"/></material>
+  <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+
+  <!-- Şartname 7.1: 1.3m x 1.15m x 0.72m -->
+  <link name="base_link">
+    <visual>
+      <geometry><box size="1.3 1.15 0.72"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry><box size="1.3 1.15 0.72"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="50.0"/>
+      <inertia ixx="10.0" ixy="0" ixz="0" iyy="10.0" iyz="0" izz="15.0"/>
+    </inertial>
+  </link>
+
+  <!-- Tekerlek Tanımları (Çap: 0.4m, Kalınlık: 0.08m) -->
+  <xacro:macro name="wheel" params="prefix x y">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="0.2" length="0.08"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="0.2" length="0.08"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="2.0"/>
+        <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="${x} ${y} -0.3" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel prefix="rl" x="-0.4" y="0.6"/>
+  <xacro:wheel prefix="rr" x="-0.4" y="-0.6"/>
+  <xacro:wheel prefix="fl" x="0.4" y="0.6"/>
+  <xacro:wheel prefix="fr" x="0.4" y="-0.6"/>
+
+  <!-- LiDAR -->
+  <link name="lidar_link">
+    <visual><geometry><cylinder radius="0.05" length="0.05"/></geometry><material name="black"/></visual>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/><child link="lidar_link"/><origin xyz="0.5 0 0.38" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Kamera -->
+  <link name="camera_link">
+    <visual><geometry><box size="0.05 0.1 0.05"/></geometry></visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/><child link="camera_link"/><origin xyz="0.65 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Diff Drive Plugin -->
+  <gazebo>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros><remapping>cmd_vel:=cmd_vel</remapping><remapping>odom:=odom</remapping></ros>
+      <left_joint>rl_wheel_joint</left_joint>
+      <right_joint>rr_wheel_joint</right_joint>
+      <wheel_separation>1.2</wheel_separation>
+      <wheel_diameter>0.4</wheel_diameter>
+      <max_wheel_torque>200</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+  <!-- LiDAR Plugin -->
+  <gazebo reference="lidar_link">
+    <sensor type="ray" name="lidar">
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan><horizontal><samples>360</samples><resolution>1</resolution><min_angle>-3.14</min_angle><max_angle>3.14</max_angle></horizontal></scan>
+        <range><min>0.3</min><max>30.0</max></range>
+      </ray>
+      <plugin name="lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <ros><remapping>~/out:=scan</remapping></ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- IMU Plugin -->
+  <gazebo>
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+      <ros><remapping>~/out:=imu/data</remapping></ros>
+      <body_name>base_link</body_name>
+      <update_rate_hz>30.0</update_rate_hz>
+    </plugin>
+  </gazebo>
+
+</robot>
