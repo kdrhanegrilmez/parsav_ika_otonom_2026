@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable, DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
@@ -17,10 +17,8 @@ def generate_launch_description():
     world_file = os.path.join(pkg_ika_gazebo, 'worlds', 'parkur.world')
     nav_params = os.path.join(pkg_ika_bringup, 'config', 'nav2_params.yaml')
     
-    # Paths for Gazebo models and textures
     models_path = os.path.join(pkg_ika_gazebo, 'models')
-    
-    # Robot State Publisher
+
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
 
@@ -30,15 +28,11 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_desc, 'use_sim_time': True}]
     )
 
-    # Gazebo Sim (Harmonic)
     gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
+        PythonLaunchDescriptionSource(os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
         launch_arguments={'gz_args': f'-r {world_file}'}.items()
     )
 
-    # Spawn Robot
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
@@ -46,7 +40,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Bridge (ROS 2 <-> Gazebo Sim)
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -63,50 +56,29 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Nav2 Stack
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_nav2_bringup, 'launch', 'navigation_launch.py')),
-        launch_arguments={
-            'use_sim_time': 'True',
-            'params_file': nav_params,
-            'autostart': 'True'
-        }.items()
+        launch_arguments={'use_sim_time': 'True', 'params_file': nav_params, 'autostart': 'True'}.items()
     )
 
-    # SLAM (For mapping and localization)
     slam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_slam_toolbox, 'launch', 'online_async_launch.py')),
         launch_arguments={'use_sim_time': 'True'}.items()
     )
 
-    # Otonom Düğümler (Mission Manager, YOLO, Lidar)
-    mission_manager = Node(
-        package='ika_mission_manager',
-        executable='mission_manager',
-        output='screen',
-        parameters=[{'use_sim_time': True}]
-    )
-    
-    watchdog = Node(
-        package='ika_mission_manager',
-        executable='watchdog_node',
-        output='screen',
-        parameters=[{'use_sim_time': True}]
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')],
+        parameters=[{'use_sim_time': True}],
+        output='screen'
     )
 
-    tabela_detector = Node(
-        package='ika_perception',
-        executable='tabela_detector',
-        output='screen',
-        parameters=[{'use_sim_time': True}]
-    )
-
-    lidar_processor = Node(
-        package='ika_perception',
-        executable='lidar_processor',
-        output='screen',
-        parameters=[{'use_sim_time': True}]
-    )
+    mission_manager = Node(package='ika_mission_manager', executable='mission_manager', output='screen', parameters=[{'use_sim_time': True}])
+    watchdog = Node(package='ika_mission_manager', executable='watchdog_node', output='screen', parameters=[{'use_sim_time': True}])
+    tabela_detector = Node(package='ika_perception', executable='tabela_detector', output='screen', parameters=[{'use_sim_time': True}])
+    lidar_processor = Node(package='ika_perception', executable='lidar_processor', output='screen', parameters=[{'use_sim_time': True}])
 
     return LaunchDescription([
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', models_path),
@@ -116,6 +88,7 @@ def generate_launch_description():
         bridge,
         nav2_launch,
         slam_launch,
+        rviz_node,
         mission_manager,
         watchdog,
         tabela_detector,
