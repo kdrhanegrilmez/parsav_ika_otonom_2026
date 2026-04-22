@@ -1,0 +1,42 @@
+# TEKNOFEST 2026 IKA Deployment Dockerfile
+# Base: NVIDIA L4T ROS Humble (Jetson Orin Nano / Xavier)
+FROM nvcr.io/nvidia/l4t-ros:r35.1.0-pth1.12-py3
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_DISTRO=humble
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-robot-localization \
+    ros-humble-slam-toolbox \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-xacro \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies for Perception
+RUN pip3 install --no-cache-dir \
+    ultralytics \
+    opencv-python \
+    numpy \
+    scikit-learn
+
+# Create Workspace
+WORKDIR /ika_ws/src
+COPY . .
+
+# Build the workspace
+WORKDIR /ika_ws
+RUN . /opt/ros/humble/setup.sh && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# Setup entrypoint
+COPY ./Dockerfile.jetson /entrypoint.sh 
+# (Normally a separate script, but for simplicity we can source in bash)
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /ika_ws/install/setup.bash" >> ~/.bashrc
+
+CMD ["bash"]

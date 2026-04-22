@@ -27,56 +27,41 @@ Sistem, **ROS 2 Humble** üzerine inşa edilmiş modüler bir yapıya sahiptir:
 - **`ika_gazebo`**: Kayar engel eklentisi dahil tam parkur simülasyonu.
 - **`ika_bringup`**: Nav2, EKF ve tüm sistem başlatma konfigürasyonları.
 
-### Mission Manager Durum Geçişleri
-
-```mermaid
-stateDiagram-v2
-    [*] --> INIT
-    INIT --> IDLE
-    IDLE --> NAVIGATING
-    NAVIGATING --> WAIT_ON_SLOPE: eğim > 24° veya STOP tabelası
-    WAIT_ON_SLOPE --> NAVIGATING: 2 saniye sonra
-    NAVIGATING --> STOPPED: hedef algılandı
-    STOPPED --> FIRING: hedef kilitlendi
-    FIRING --> NAVIGATING: atış tamamlandı
-    NAVIGATING --> FAILSAFE: acil durum
-    WAIT_ON_SLOPE --> FAILSAFE
-    STOPPED --> FAILSAFE
-    FIRING --> FAILSAFE
-    FAILSAFE --> [*]
-```
-
 ## 🛠️ Kurulum
 
 ```bash
 # Çalışma alanını oluştur
 mkdir -p ~/ika_ws/src
 cd ~/ika_ws/src
-git clone https://github.com/KarabukGM-PARSAV/parsav_ika_otonom_2026.git .
+git clone https://github.com/kdrhanegrilmez/parsav_ika_otonom_2026.git .
 
 # Bağımlılıkları yükle
 cd ~/ika_ws
 rosdep install --from-paths src --ignore-src -r -y
-pip3 install ultralytics opencv-python numpy
-
-# Derle
-colcon build --symlink-install
-source install/setup.bash
+pip3 install ultralytics opencv-python numpy scikit-learn
 ```
 
 ## 🚀 Çalıştırma
 
 ```bash
+# Derle
+colcon build --symlink-install
+source install/setup.bash
+
+# Başlat
 ros2 launch ika_bringup ika.launch.py
 ```
 
 ## 📦 Jetson Deployment
 
+NVIDIA Jetson Orin Nano üzerinde GPU desteği ile çalıştırmak için:
+
 ```bash
 # Docker Build
 docker build -t parsav-ika:latest -f Dockerfile.jetson .
+
 # Run
-docker run --runtime nvidia --network host parsav-ika:latest
+docker run --runtime nvidia --network host -it parsav-ika:latest
 ```
 
 ## 📂 Dosya Yapısı
@@ -87,5 +72,7 @@ ika_ws/src/
 ├── ika_gazebo/           # Simülasyon dünyası ve eklentiler
 ├── ika_perception/       # YOLO, LiDAR işleme düğümleri
 ├── ika_mission_manager/  # FSM tabanlı görev yöneticisi
-└── ika_bringup/          # Ana başlatma ve konfigürasyon
+├── ika_bringup/          # Ana başlatma ve konfigürasyon
+├── docs/                 # Teknik dokümantasyon ve planlar
+└── Dockerfile.jetson     # Jetson Orin Nano imajı
 ```
