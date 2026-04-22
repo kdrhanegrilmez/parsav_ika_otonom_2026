@@ -27,6 +27,49 @@ Sistem, **ROS 2 Humble** üzerine inşa edilmiş modüler bir yapıya sahiptir:
 - **`ika_gazebo`**: Kayar engel eklentisi dahil tam parkur simülasyonu.
 - **`ika_bringup`**: Nav2, EKF ve tüm sistem başlatma konfigürasyonları.
 
+## 📊 Sistem Akış Şeması (Flowchart)
+
+```mermaid
+graph TD
+    subgraph SENSOR_LAYER [Sensör Katmanı]
+        A[LiDAR]
+        B[Kamera]
+        C[IMU / Odom]
+    end
+
+    subgraph PERCEPTION_LAYER [Algılama Katmanı]
+        D[DBSCAN: Engel Kümeleme]
+        E[YOLOv8: Tabela/Hedef Tespiti]
+        F[EKF: Konum Kestirimi]
+    end
+
+    subgraph DECISION_LAYER [Karar Katmanı]
+        G{Mission Manager: FSM}
+        H[Nav2: Rota Planlama]
+    end
+
+    subgraph SAFETY_LAYER [Güvenlik & Kontrol]
+        I[Watchdog: Heartbeat Kontrol]
+        J[PID: Motor Sürücü Komutları]
+    end
+
+    A --> D
+    B --> E
+    C --> F
+    
+    D -->|Hız Vektörü| G
+    E -->|ID / Mesafe| G
+    F -->|Pose| H
+    
+    G -->|Hedef Waypoint| H
+    G -->|Asenkron Bekleme / Atış| J
+    
+    H -->|cmd_vel_nav| I
+    I -->|Güvenli cmd_vel| J
+    
+    J -->|PWM/Sinyal| K[Fiziksel İKA Hareket]
+```
+
 ## 🛠️ Kurulum
 
 ```bash
