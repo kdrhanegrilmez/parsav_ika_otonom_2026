@@ -7,7 +7,7 @@ from rclpy.duration import Duration
 class WatchdogNode(Node):
     def __init__(self):
         super().__init__('watchdog_node')
-        self.get_logger().warn('PARSAV İKA Watchdog Aktif. Görev Yöneticisi izleniyor...')
+        self.get_logger().warn('PARSAV İKA Watchdog v2.0 Aktif. Tolerans: 2.0s')
         
         self.last_heartbeat = self.get_clock().now()
         
@@ -17,7 +17,7 @@ class WatchdogNode(Node):
         # Yayıncı: Acil durum durdurma sinyali
         self.safe_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         
-        # Kontrol Döngüsü: 200ms (5Hz)
+        # Kontrol Döngüsü: 200ms
         self.create_timer(0.2, self.check_system_health)
 
     def heartbeat_cb(self, msg):
@@ -26,8 +26,8 @@ class WatchdogNode(Node):
     def check_system_health(self):
         elapsed = self.get_clock().now() - self.last_heartbeat
         
-        # Eğer 0.5 saniyeden fazla süredir kalp atışı gelmiyorsa (Haberleşme kesilmişse)
-        if elapsed > Duration(seconds=0.5):
+        # Simülasyon yavaşlamasından dolayı toleransı 2 saniyeye çıkardım
+        if elapsed > Duration(seconds=2.0):
             self.get_logger().error('KRİTİK HATA: Mission Manager kalp atışı kesildi! Acil durdurma uygulanıyor.')
             stop_msg = Twist()
             stop_msg.linear.x = 0.0
