@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
@@ -11,13 +11,14 @@ def generate_launch_description():
     pkg_ika_gazebo = get_package_share_directory('ika_gazebo')
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
-    pkg_slam_toolbox = get_package_share_directory('slam_toolbox')
     
     urdf_file = os.path.join(pkg_ika_description, 'urdf', 'ika.urdf')
     world_file = os.path.join(pkg_ika_gazebo, 'worlds', 'parkur.world')
     nav_params = os.path.join(pkg_ika_bringup, 'config', 'nav2_params.yaml')
-    
     models_path = os.path.join(pkg_ika_gazebo, 'models')
+    
+    # Python library path for Ultralytics
+    python_path = AppendEnvironmentVariable('PYTHONPATH', os.path.expanduser('~/.local/lib/python3.12/site-packages'))
 
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
@@ -36,7 +37,7 @@ def generate_launch_description():
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', urdf_file, '-name', 'ika', '-x', '0', '-y', '0', '-z', '1.0'],
+        arguments=['-file', urdf_file, '-name', 'ika', '-z', '1.0'],
         output='screen'
     )
 
@@ -61,15 +62,18 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': 'True', 'params_file': nav_params, 'autostart': 'True'}.items()
     )
 
-    slam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_slam_toolbox, 'launch', 'online_async_launch.py')),
-        launch_arguments={'use_sim_time': 'True'}.items()
+    # Simplified SLAM launch to avoid transition errors
+    slam_node = Node(
+        package='slam_toolbox',
+        executable='async_slam_toolbox_node',
+        name='slam_toolbox',
+        output='screen',
+        parameters=[{'use_sim_time': True, 'mode': 'mapping'}]
     )
 
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
-        name='rviz2',
         arguments=['-d', os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')],
         parameters=[{'use_sim_time': True}],
         output='screen'
@@ -78,19 +82,18 @@ def generate_launch_description():
     mission_manager = Node(package='ika_mission_manager', executable='mission_manager', output='screen', parameters=[{'use_sim_time': True}])
     watchdog = Node(package='ika_mission_manager', executable='watchdog_node', output='screen', parameters=[{'use_sim_time': True}])
     tabela_detector = Node(package='ika_perception', executable='tabela_detector', output='screen', parameters=[{'use_sim_time': True}])
-    lidar_processor = Node(package='ika_perception', executable='lidar_processor', output='screen', parameters=[{'use_sim_time': True}])
 
     return LaunchDescription([
         AppendEnvironmentVariable('GZ_SIM_RESOURCE_PATH', models_path),
+        python_path,
         gz_sim,
         robot_state_publisher,
         spawn_robot,
         bridge,
         nav2_launch,
-        slam_launch,
+        slam_node,
         rviz_node,
         mission_manager,
         watchdog,
-        tabela_detector,
-        lidar_processor
+        tabela_detector
     ])

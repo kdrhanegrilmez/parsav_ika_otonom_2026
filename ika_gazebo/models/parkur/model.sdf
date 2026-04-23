@@ -5,30 +5,21 @@
     <link name="link">
       <visual name="zemin_visual"><geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry></visual>
       <collision name="zemin_collision"><geometry><mesh><uri>model://parkur/meshes/zemin.dae</uri></mesh></geometry></collision>
-
       <visual name="yol_visual"><geometry><mesh><uri>model://parkur/meshes/yol.dae</uri></mesh></geometry></visual>
       <collision name="yol_collision"><geometry><mesh><uri>model://parkur/meshes/yol.dae</uri></mesh></geometry></collision>
-
       <visual name="bariyer_visual"><geometry><mesh><uri>model://parkur/meshes/bariyer.dae</uri></mesh></geometry></visual>
       <collision name="bariyer_collision"><geometry><mesh><uri>model://parkur/meshes/bariyer.dae</uri></mesh></geometry></collision>
-
       <visual name="cizgiler_visual"><geometry><mesh><uri>model://parkur/meshes/cizgiler.dae</uri></mesh></geometry></visual>
-
       <visual name="dik_egim_visual"><geometry><mesh><uri>model://parkur/meshes/dik_egim.dae</uri></mesh></geometry></visual>
       <collision name="dik_egim_collision"><geometry><mesh><uri>model://parkur/meshes/dik_egim.dae</uri></mesh></geometry></collision>
-
       <visual name="yan_egim_visual"><geometry><mesh><uri>model://parkur/meshes/yan_egim.dae</uri></mesh></geometry></visual>
       <collision name="yan_egim_collision"><geometry><mesh><uri>model://parkur/meshes/yan_egim.dae</uri></mesh></geometry></collision>
-
       <visual name="sudan_gecis_visual"><geometry><mesh><uri>model://parkur/meshes/sudan_gecis.dae</uri></mesh></geometry></visual>
       <collision name="sudan_gecis_collision"><geometry><mesh><uri>model://parkur/meshes/sudan_gecis.dae</uri></mesh></geometry></collision>
-
       <visual name="tasli_visual"><geometry><mesh><uri>model://parkur/meshes/tasli_cakilli_yol.dae</uri></mesh></geometry></visual>
       <collision name="tasli_collision"><geometry><mesh><uri>model://parkur/meshes/tasli_cakilli_yol.dae</uri></mesh></geometry></collision>
-
       <visual name="kukalar_visual"><geometry><mesh><uri>model://parkur/meshes/kukalar.dae</uri></mesh></geometry></visual>
       <collision name="kukalar_collision"><geometry><mesh><uri>model://parkur/meshes/kukalar.dae</uri></mesh></geometry></collision>
-
       <visual name="tabelalar_visual"><geometry><mesh><uri>model://parkur/meshes/tabelalar.dae</uri></mesh></geometry></visual>
       <collision name="tabelalar_collision"><geometry><mesh><uri>model://parkur/meshes/tabelalar.dae</uri></mesh></geometry></collision>
     </link>
